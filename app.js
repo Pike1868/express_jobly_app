@@ -25,6 +25,11 @@ app.use("/auth", authRoutes);
 app.use("/companies", companiesRoutes);
 app.use("/users", usersRoutes);
 
+app.get("/favicon.ico", (req, res) => res.sendStatus(204));
+
+app.get("/", async (req, res, next) => {
+  res.send("App is running...");
+});
 
 /** Handle 404 errors -- this matches everything */
 app.use(function (req, res, next) {

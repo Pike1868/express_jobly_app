@@ -16,7 +16,7 @@ function getDatabaseUri() {
   } else if (process.env.NODE_ENV === "dev") {
     return process.env.DB_URI_DEV;
   } else {
-    process.env.DB_URI_PROD;
+    return process.env.DB_URI_PROD;
   }
 }
 
