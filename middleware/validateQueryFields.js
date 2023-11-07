@@ -1,6 +1,6 @@
 const { BadRequestError } = require("../expressError");
 
-//Middleware function to validate query parameters when querying companies with a filtered field, return new error
+//Middleware function to validate query parameters when querying companies with a filtered field, return new error if any field is not valid
 
 function validateCompanyQueryFields(req, res, next) {
   const validCompanyFields = ["name", "minEmployees", "maxEmployees"];
