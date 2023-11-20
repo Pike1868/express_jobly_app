@@ -6,6 +6,8 @@ const Company = require("../models/company");
 const { createToken } = require("../helpers/tokens");
 
 async function commonBeforeAll() {
+  //set test db environment
+  process.env.NODE_ENV = "test";
   // noinspection SqlWithoutWhere
   await db.query("DELETE FROM users");
   // noinspection SqlWithoutWhere

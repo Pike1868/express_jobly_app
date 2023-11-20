@@ -31,7 +31,7 @@ class Job {
       `INSERT INTO jobs
         (title, salary, equity, company_handle)
         VALUES($1, $2, $3, $4)
-        RETURNING title, salary, equity, company_handle AS "companyHandle"`,
+        RETURNING id, title, salary, equity, company_handle AS "companyHandle"`,
       [title, salary, equity, company_handle]
     );
     const job = result.rows[0];
@@ -58,7 +58,8 @@ class Job {
    * */
   static async findAll(filters) {
     let baseQuery = `
-    SELECT title,
+    SELECT id,
+    title,
     salary,
     equity,
     company_handle AS "companyHandle"
@@ -85,7 +86,6 @@ class Job {
     }
 
     const fullQuery = (baseQuery += " ORDER BY title");
-    console.log(fullQuery)
 
     const jobs = await db.query(fullQuery, filterValues);
 
@@ -96,26 +96,30 @@ class Job {
    *
    * Returns {title, salary, equity, companyHandle}
    *
+   * Throws BadRequestError if given id is not a number.
    * Throws NotFoundError if no job with given id exists.
    */
 
   static async get(id) {
+    // Check if 'id' is NaN
+    if (isNaN(parseInt(id))) {
+      throw new BadRequestError(`Invalid job id: ${id}`);
+    }
     const jobRes = await db.query(
       `SELECT id,
-      title,
-      salary,
-      equity,
-      company_handle AS companyHandle
-      FROM jobs
-      WHERE id =$1
-      `,
+              title,
+              salary,
+              equity,
+              company_handle AS "companyHandle"
+       FROM jobs
+       WHERE id = $1`,
       [id]
     );
 
     const job = jobRes.rows[0];
 
     if (!job) {
-      throw new NotFoundError(`No job with id of: ${id}`);
+      throw new NotFoundError(`No job with id: ${id}`);
     }
     return job;
   }
@@ -141,10 +145,11 @@ class Job {
     UPDATE jobs
     SET ${setCols}
     WHERE id = ${handleVarIdx}
-    RETURNING title,
+    RETURNING id,
+    title,
     salary,
     equity,
-    company_handle AS companyHandle`;
+    company_handle AS "companyHandle"`;
 
     const result = await db.query(querySql, [...values, id]);
     const job = result.rows[0];
@@ -168,9 +173,11 @@ class Job {
              RETURNING id`,
       [id]
     );
-    const company = result.rows[0];
+    const job = result.rows[0];
 
-    if (!company) throw new NotFoundError(`No company: ${handle}`);
+    if (!job) {
+      throw new NotFoundError(`No job with id of: ${id}`);
+    }
   }
 }
 
