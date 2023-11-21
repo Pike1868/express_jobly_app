@@ -17,7 +17,7 @@ afterAll(commonAfterAll);
 
 /************************************** create */
 
-describe("create", function () {
+describe("create - COMPANY", function () {
   const newCompany = {
     handle: "new",
     name: "New",
@@ -46,7 +46,7 @@ describe("create", function () {
     ]);
   });
 
-  test("bad request with dupe", async function () {
+  test("bad request error if company already exists (duplicate error)", async function () {
     try {
       await Company.create(newCompany);
       await Company.create(newCompany);
@@ -59,7 +59,7 @@ describe("create", function () {
 
 /************************************** findAll */
 
-describe("findAll", function () {
+describe("findAll - COMPANIES", function () {
   test("works: no filter", async function () {
     let companies = await Company.findAll({});
     expect(companies).toEqual([
@@ -165,7 +165,7 @@ describe("findAll", function () {
 
 /************************************** get */
 
-describe("get", function () {
+describe("get - COMPANY", function () {
   test("works", async function () {
     let company = await Company.get("c1");
     expect(company).toEqual({
@@ -174,10 +174,33 @@ describe("get", function () {
       description: "Desc1",
       numEmployees: 1,
       logoUrl: "http://c1.img",
+      jobs: [
+        {
+          id: expect.any(Number),
+          title: "Sales Executive",
+          salary: 50000,
+          equity: "0.1",
+          companyHandle: "c1",
+        },
+        {
+          id: expect.any(Number),
+          title: "Accountant",
+          salary: 100000,
+          equity: "0.2",
+          companyHandle: "c1",
+        },
+        {
+          id: expect.any(Number),
+          title: "Customer Service Rep",
+          salary: 55000,
+          equity: "0",
+          companyHandle: "c1",
+        },
+      ],
     });
   });
 
-  test("not found if no such company", async function () {
+  test("not found error if company handle is invalid", async function () {
     try {
       await Company.get("nope");
       fail();
@@ -189,7 +212,7 @@ describe("get", function () {
 
 /************************************** update */
 
-describe("update", function () {
+describe("update - COMPANY", function () {
   const updateData = {
     name: "New",
     description: "New Description",
@@ -250,7 +273,7 @@ describe("update", function () {
     ]);
   });
 
-  test("not found if no such company", async function () {
+  test("not found error if company handle is invalid", async function () {
     try {
       await Company.update("nope", updateData);
       fail();
@@ -271,7 +294,7 @@ describe("update", function () {
 
 /************************************** remove */
 
-describe("remove", function () {
+describe("remove - COMPANY", function () {
   test("works", async function () {
     await Company.remove("c1");
     const res = await db.query(
@@ -280,7 +303,7 @@ describe("remove", function () {
     expect(res.rows.length).toEqual(0);
   });
 
-  test("not found if no such company", async function () {
+  test("not found error if company handle is invalid", async function () {
     try {
       await Company.remove("nope");
       fail();

@@ -3,7 +3,10 @@
 const db = require("../db.js");
 const User = require("../models/user");
 const Company = require("../models/company");
+const Job = require("../models/jobs.js");
 const { createToken } = require("../helpers/tokens");
+
+let testJobsIds = [];
 
 async function commonBeforeAll() {
   //set test db environment
@@ -67,6 +70,50 @@ async function commonBeforeAll() {
     password: "adminPassword",
     isAdmin: true,
   });
+
+  //adding in test job data
+  const j1 = await Job.create({
+    title: "Accountant",
+    salary: 100000,
+    equity: "0.2",
+    company_handle: "c1",
+  });
+  testJobsIds.push(j1.id);
+  const j2 = await Job.create({
+    title: "Counselor",
+    salary: 50000,
+    equity: "0",
+    company_handle: "c3",
+  });
+  testJobsIds.push(j2.id);
+  const j3 = await Job.create({
+    title: "Customer Service Rep",
+    salary: 55000,
+    equity: "0",
+    company_handle: "c1",
+  });
+  testJobsIds.push(j3.id);
+  const j4 = await Job.create({
+    title: "Cybersecurity Engineer",
+    salary: 100000,
+    equity: "0.5",
+    company_handle: "c3",
+  });
+  testJobsIds.push(j4.id);
+  const j5 = await Job.create({
+    title: "Data analyst",
+    salary: 80000,
+    equity: "0.3",
+    company_handle: "c3",
+  });
+  testJobsIds.push(j5.id);
+  const j6 = await Job.create({
+    title: "Software Engineer",
+    salary: 80000,
+    equity: "0.4",
+    company_handle: "c1",
+  });
+  testJobsIds.push(j6.id);
 }
 
 async function commonBeforeEach() {
@@ -90,4 +137,5 @@ module.exports = {
   commonAfterAll,
   u1Token,
   adminUserToken,
+  testJobsIds,
 };

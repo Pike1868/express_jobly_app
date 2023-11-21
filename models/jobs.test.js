@@ -319,7 +319,7 @@ describe("get - JOB", function () {
     }
   });
 
-  test("not found id is not a valid job id", async function () {
+  test("not found if id is not a valid job id", async function () {
     try {
       await Job.get(9000);
     } catch (err) {
@@ -347,7 +347,7 @@ describe("update - JOB", function () {
     });
   });
 
-  test("not found if no such job", async function () {
+  test("not found error if job id is invalid", async function () {
     try {
       await Job.update(9000, {
         title: "test updates",
@@ -358,12 +358,11 @@ describe("update - JOB", function () {
     }
   });
 
-  test("bad request with no data", async function () {
+  test("bad request error with no data", async function () {
     try {
       await Job.update(testJobsIds[0], {});
       fail();
     } catch (err) {
-      console.log(err);
       expect(err instanceof BadRequestError).toBeTruthy();
     }
   });
@@ -380,12 +379,11 @@ describe("remove - JOB", function () {
     expect(res.rows.length).toEqual(0);
   });
 
-  test("not found if no such job", async function () {
+  test("not found error if job id is invalid", async function () {
     try {
       await Job.remove(0);
       fail();
     } catch (err) {
-      console.log(err);
       expect(err instanceof NotFoundError).toBeTruthy();
     }
   });

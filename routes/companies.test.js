@@ -49,7 +49,7 @@ describe("POST /companies", function () {
     expect(resp.statusCode).toEqual(401);
   });
 
-  test("bad request with missing data", async function () {
+  test("bad request error with missing data", async function () {
     const resp = await request(app)
       .post("/companies")
       .send({
@@ -60,7 +60,7 @@ describe("POST /companies", function () {
     expect(resp.statusCode).toEqual(400);
   });
 
-  test("bad request with invalid data", async function () {
+  test("bad request error with invalid data", async function () {
     const resp = await request(app)
       .post("/companies")
       .send({
@@ -75,7 +75,7 @@ describe("POST /companies", function () {
 /************************************** GET /companies */
 
 describe("GET /companies", function () {
-  test("ok for anon", async function () {
+  test("ok for anonymous user", async function () {
     const resp = await request(app).get("/companies");
     expect(resp.body).toEqual({
       companies: [
@@ -119,7 +119,7 @@ describe("GET /companies", function () {
 /************************************** GET /companies/:handle */
 
 describe("GET /companies/:handle", function () {
-  test("works for anon", async function () {
+  test("works for anonymous user", async function () {
     const resp = await request(app).get(`/companies/c1`);
     expect(resp.body).toEqual({
       company: {
@@ -128,6 +128,29 @@ describe("GET /companies/:handle", function () {
         description: "Desc1",
         numEmployees: 1,
         logoUrl: "http://c1.img",
+        jobs: [
+          {
+            id: expect.any(Number),
+            title: "Accountant",
+            salary: 100000,
+            equity: "0.2",
+            companyHandle: "c1",
+          },
+          {
+            id: expect.any(Number),
+            title: "Customer Service Rep",
+            salary: 55000,
+            equity: "0",
+            companyHandle: "c1",
+          },
+          {
+            id: expect.any(Number),
+            title: "Software Engineer",
+            salary: 80000,
+            equity: "0.4",
+            companyHandle: "c1",
+          },
+        ],
       },
     });
   });
@@ -141,11 +164,12 @@ describe("GET /companies/:handle", function () {
         description: "Desc2",
         numEmployees: 2,
         logoUrl: "http://c2.img",
+        jobs: [],
       },
     });
   });
 
-  test("not found for no such company", async function () {
+  test("not found error if company handle invalid", async function () {
     const resp = await request(app).get(`/companies/nope`);
     expect(resp.statusCode).toEqual(404);
   });
@@ -172,7 +196,7 @@ describe("PATCH /companies/:handle", function () {
     });
   });
 
-  test("unauth for anon", async function () {
+  test("unauthorized for anonymous user", async function () {
     const resp = await request(app)
       .patch(`/companies/c1`)
       .send({
@@ -182,14 +206,14 @@ describe("PATCH /companies/:handle", function () {
     expect(resp.statusCode).toEqual(401);
   });
 
-  test("unauth for non-admin user", async function () {
+  test("unauthorized for non-admin user", async function () {
     const resp = await request(app).patch(`/companies/c1`).send({
       name: "C1-new",
     });
     expect(resp.statusCode).toEqual(401);
   });
 
-  test("not found on no such company", async function () {
+  test("not found error if company handle invalid", async function () {
     const resp = await request(app)
       .patch(`/companies/nope`)
       .send({
@@ -199,7 +223,7 @@ describe("PATCH /companies/:handle", function () {
     expect(resp.statusCode).toEqual(404);
   });
 
-  test("bad request on handle change attempt", async function () {
+  test("bad request error on handle change attempt", async function () {
     const resp = await request(app)
       .patch(`/companies/c1`)
       .send({
@@ -209,7 +233,7 @@ describe("PATCH /companies/:handle", function () {
     expect(resp.statusCode).toEqual(400);
   });
 
-  test("bad request on invalid data", async function () {
+  test("bad request error on invalid data", async function () {
     const resp = await request(app)
       .patch(`/companies/c1`)
       .send({
@@ -230,18 +254,18 @@ describe("DELETE /companies/:handle", function () {
     expect(resp.body).toEqual({ deleted: "c1" });
   });
 
-  test("unauth for anon", async function () {
+  test("unauthorized for anonymous user", async function () {
     const resp = await request(app).delete(`/companies/c1`);
     expect(resp.statusCode).toEqual(401);
   });
-  test("unauth for non-admin user", async function () {
+  test("unauthorized for non-admin user", async function () {
     const resp = await request(app)
       .delete(`/companies/c1`)
       .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(401);
   });
 
-  test("not found for no such company", async function () {
+  test("not found error if company handle invalid", async function () {
     const resp = await request(app)
       .delete(`/companies/nope`)
       .set("authorization", `Bearer ${adminUserToken}`);

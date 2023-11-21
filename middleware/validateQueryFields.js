@@ -10,4 +10,13 @@ function validateCompanyQueryFields(req, res, next) {
   next();
 }
 
-module.exports = { validateCompanyQueryFields };
+function validateJobQueryFields(req, res, next) {
+  const validJobFields = ["title", "minSalary", "hasEquity"];
+  if (!Object.keys(req.query).every((key) => validJobFields.includes(key))) {
+    return next(new BadRequestError("Invalid job fields"));
+  }
+  next();
+}
+
+
+module.exports = { validateCompanyQueryFields, validateJobQueryFields };

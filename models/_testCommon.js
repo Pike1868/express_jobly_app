@@ -5,6 +5,8 @@ const { BCRYPT_WORK_FACTOR } = require("../config");
 let testJobsIds = [];
 
 async function commonBeforeAll() {
+  //set test db environment
+  process.env.NODE_ENV = "test";
   // noinspection SqlWithoutWhere
   await db.query("DELETE FROM companies");
   // noinspection SqlWithoutWhere
