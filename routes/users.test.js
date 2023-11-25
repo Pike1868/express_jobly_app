@@ -13,6 +13,7 @@ const {
   commonAfterAll,
   u1Token,
   adminUserToken,
+  testJobsIds,
 } = require("./_testCommon");
 
 beforeAll(commonBeforeAll);
@@ -205,6 +206,7 @@ describe("GET /users/:username", function () {
         lastName: "U1L",
         email: "user1@user.com",
         isAdmin: false,
+        jobs: [],
       },
     });
   });
@@ -220,6 +222,7 @@ describe("GET /users/:username", function () {
         lastName: "U1L",
         email: "user1@user.com",
         isAdmin: false,
+        jobs: [],
       },
     });
   });
@@ -389,6 +392,57 @@ describe("DELETE /users/:username", function () {
   test("not found if username does not exist", async function () {
     const resp = await request(app)
       .delete(`/users/nope`)
+      .set("authorization", `Bearer ${adminUserToken}`);
+    expect(resp.statusCode).toEqual(404);
+  });
+});
+
+/************************************** POST /users/:username/jobs/:id */
+
+describe("POST /users/:username/jobs/:id", function () {
+  test("works for admin user to apply to a job for a user", async function () {
+    const resp = await request(app)
+      .post(`/users/u1/jobs/${testJobsIds[1]}`)
+      .set("authorization", `Bearer ${adminUserToken}`);
+    expect(resp.body).toEqual({ applied: testJobsIds[1] });
+  });
+
+  test("current user able to apply for job", async function () {
+    const resp = await request(app)
+      .post(`/users/u1/jobs/${testJobsIds[1]}`)
+      .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.body).toEqual({ applied: testJobsIds[1] });
+  });
+
+  test("unauthorized for non admin users to apply to jobs for other users", async function () {
+    const resp = await request(app)
+      .post(`/users/u3/jobs/${testJobsIds[1]}`)
+      .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(401);
+  });
+
+  test("unauthorized for anonymous users", async function () {
+    const resp = await request(app).post(`/users/u1/jobs/${testJobsIds[1]}`);
+    expect(resp.statusCode).toEqual(401);
+  });
+
+  test("not found error if username does not exist", async function () {
+    const resp = await request(app)
+      .post(`/users/nope/jobs/${testJobsIds[1]}`)
+      .set("authorization", `Bearer ${adminUserToken}`);
+    expect(resp.statusCode).toEqual(404);
+  });
+
+  test("not found error if job id is invalid", async function () {
+    const resp = await request(app)
+      .post(`/users/u1/jobs/0`)
+      .set("authorization", `Bearer ${adminUserToken}`);
+    expect(resp.statusCode).toEqual(404);
+  });
+
+  test("bad request error if job id is invalid", async function () {
+    const resp = await request(app)
+      .post(`/users/u1/jobs/0`)
       .set("authorization", `Bearer ${adminUserToken}`);
     expect(resp.statusCode).toEqual(404);
   });
