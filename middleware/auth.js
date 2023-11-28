@@ -11,7 +11,8 @@ const { UnauthorizedError } = require("../expressError");
  * If a token was provided, verify it, and, if valid, store the token payload
  * on res.locals (this will include the username and isAdmin field.)
  *
- * It's not an error if no token was provided or if the token is not valid.
+ * It's not an error if no token was provided or if the token is not valid except for the case where the token is expired. If an expired token is used,
+ * an UnauthorizedError indicating that the token is expired will be thrown.
  */
 
 function authenticateJWT(req, res, next) {
@@ -23,6 +24,9 @@ function authenticateJWT(req, res, next) {
     }
     return next();
   } catch (err) {
+    if (err.name === "TokenExpiredError") {
+      return next(new UnauthorizedError("Token expired"));
+    }
     return next();
   }
 }

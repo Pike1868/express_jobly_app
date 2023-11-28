@@ -14,6 +14,7 @@ const {
   u1Token,
   adminUserToken,
   testJobsIds,
+  u2Token,
 } = require("./_testCommon");
 
 beforeAll(commonBeforeAll);
@@ -31,7 +32,6 @@ describe("POST /users", function () {
         username: "u-new",
         firstName: "First-new",
         lastName: "Last-newL",
-        password: "password-new",
         email: "new@email.com",
         isAdmin: false,
       })
@@ -56,7 +56,6 @@ describe("POST /users", function () {
         username: "u-new",
         firstName: "First-new",
         lastName: "Last-newL",
-        password: "password-new",
         email: "new@email.com",
         isAdmin: true,
       })
@@ -79,7 +78,6 @@ describe("POST /users", function () {
       username: "u-new",
       firstName: "First-new",
       lastName: "Last-newL",
-      password: "password-new",
       email: "new@email.com",
       isAdmin: true,
     });
@@ -93,7 +91,6 @@ describe("POST /users", function () {
         username: "u-new",
         firstName: "First-new",
         lastName: "Last-newL",
-        password: "password-new",
         email: "new@email.com",
         isAdmin: true,
       })
@@ -118,7 +115,6 @@ describe("POST /users", function () {
         username: "u-new",
         firstName: "First-new",
         lastName: "Last-newL",
-        password: "password-new",
         email: "not-an-email",
         isAdmin: true,
       })
@@ -445,5 +441,56 @@ describe("POST /users/:username/jobs/:id", function () {
       .post(`/users/u1/jobs/0`)
       .set("authorization", `Bearer ${adminUserToken}`);
     expect(resp.statusCode).toEqual(404);
+  });
+});
+
+/************************************** PATCH /users/:username/password */
+
+describe("PATCH /users/:username/password", function () {
+  test("works for admin user", async function () {
+    const resp = await request(app)
+      .patch(`/users/u1/password`)
+      .send({ password: "newPassword1" })
+      .set("authorization", `Bearer ${adminUserToken}`);
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body).toEqual({
+      message: "Password updated successfully for u1",
+    });
+  });
+  test("works for correct user", async function () {
+    const resp = await request(app)
+      .patch(`/users/u1/password`)
+      .send({ password: "newPassword1" })
+      .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body).toEqual({
+      message: "Password updated successfully for u1",
+    });
+  });
+
+  test("unauthorized for wrong user", async function () {
+    const resp = await request(app)
+      .patch("/users/u1/password")
+      .send({ password: "newPassword1" })
+      .set("authorization", `Bearer ${u2Token}`);
+    expect(resp.statusCode).toEqual(401);
+  });
+
+  test("unauthorized for anonymous users", async function () {
+    const resp = await request(app)
+      .patch("/users/u1/password")
+      .send({ password: "newPassword1" });
+    expect(resp.statusCode).toEqual(401);
+  });
+
+  test("bad request error with invalid password", async function () {
+    const resp = await request(app)
+      .patch("/users/u1/password")
+      .send({ password: "Short1" })
+      .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(400);
+    expect(resp.body.error.message).toEqual(
+      "Invalid password: Password must be at least 8 characters long"
+    );
   });
 });

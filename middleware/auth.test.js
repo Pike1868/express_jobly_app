@@ -7,6 +7,9 @@ const { authenticateJWT, ensureLoggedIn, ensureAdmin } = require("./auth");
 const { SECRET_KEY } = require("../config");
 const testJwt = jwt.sign({ username: "test", isAdmin: false }, SECRET_KEY);
 const badJwt = jwt.sign({ username: "test", isAdmin: false }, "wrong");
+const expJwt = jwt.sign({ username: "test", isAdmin: false }, SECRET_KEY, {
+  expiresIn: "-1",
+});
 
 describe("authenticateJWT", function () {
   test("works: via header", function () {
@@ -49,6 +52,17 @@ describe("authenticateJWT", function () {
     authenticateJWT(req, res, next);
     expect(res.locals).toEqual({});
   });
+
+  test("unauthorized for expired token", function () {
+    const req = { headers: { authorization: `Bearer ${expJwt}` } };
+    const res = { locals: {} };
+    const next = function (err) {
+      expect(err).toBeInstanceOf(UnauthorizedError);
+      expect(err.message).toEqual("Token expired");
+    };
+
+    authenticateJWT(req, res, next);
+  });
 });
 
 describe("ensureLoggedIn", function () {
@@ -62,7 +76,7 @@ describe("ensureLoggedIn", function () {
     ensureLoggedIn(req, res, next);
   });
 
-  test("unauth if no login", function () {
+  test("unauthorized if no login", function () {
     expect.assertions(1);
     const req = {};
     const res = { locals: {} };

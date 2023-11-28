@@ -8,6 +8,7 @@ const {
   BadRequestError,
   UnauthorizedError,
 } = require("../expressError");
+const { validatePassword } = require("../helpers/password");
 
 const { BCRYPT_WORK_FACTOR } = require("../config.js");
 
@@ -73,6 +74,14 @@ class User {
 
     if (duplicateCheck.rows[0]) {
       throw new BadRequestError(`Duplicate username: ${username}`);
+    }
+
+    // Check if the password is valid
+    const passwordValidationResult = validatePassword(password);
+    if (passwordValidationResult !== true) {
+      throw new BadRequestError(
+        `Invalid password: ${passwordValidationResult}`
+      );
     }
 
     const hashedPassword = await bcrypt.hash(password, BCRYPT_WORK_FACTOR);
@@ -200,7 +209,7 @@ class User {
   /** Delete given user from database; returns undefined. */
 
   static async remove(username) {
-    let result = await db.query(
+    const result = await db.query(
       `DELETE
            FROM users
            WHERE username = $1
@@ -244,6 +253,44 @@ class User {
            VALUES ($1, $2)`,
       [jobId, username]
     );
+  }
+
+  /**
+   * Updates user password, returns username
+   *
+   *  Throws NotFoundError if user is not found.
+   **/
+  static async updatePassword(username, newPassword) {
+    const preCheck = await db.query(
+      `SELECT username
+           FROM users
+           WHERE username = $1`,
+      [username]
+    );
+
+    const userExists = preCheck.rows[0];
+
+    if (!userExists) throw new NotFoundError(`No username: ${username}`);
+
+    // Check if the password is valid
+    const passwordValidationResult = validatePassword(newPassword);
+    if (passwordValidationResult !== true) {
+      throw new BadRequestError(
+        `Invalid password: ${passwordValidationResult}`
+      );
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, BCRYPT_WORK_FACTOR);
+
+    const result = await db.query(
+      `UPDATE users
+      SET password = $1
+      WHERE username = $2
+      RETURNING username
+    `,
+      [hashedPassword, username]
+    );
+    return result.rows[0];
   }
 }
 

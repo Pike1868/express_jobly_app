@@ -7,6 +7,7 @@ describe("createToken", function () {
     const token = createToken({ username: "test", is_admin: false });
     const payload = jwt.verify(token, SECRET_KEY);
     expect(payload).toEqual({
+      exp: expect.any(Number),
       iat: expect.any(Number),
       username: "test",
       isAdmin: false,
@@ -17,6 +18,7 @@ describe("createToken", function () {
     const token = createToken({ username: "test", isAdmin: true });
     const payload = jwt.verify(token, SECRET_KEY);
     expect(payload).toEqual({
+      exp: expect.any(Number),
       iat: expect.any(Number),
       username: "test",
       isAdmin: true,
@@ -28,6 +30,7 @@ describe("createToken", function () {
     const token = createToken({ username: "test" });
     const payload = jwt.verify(token, SECRET_KEY);
     expect(payload).toEqual({
+      exp: expect.any(Number),
       iat: expect.any(Number),
       username: "test",
       isAdmin: false,

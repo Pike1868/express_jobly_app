@@ -4,15 +4,22 @@ const { SECRET_KEY } = require("../config");
 /** return signed JWT from user data. */
 
 function createToken(user) {
-  console.assert(user.isAdmin !== undefined,
-      "createToken passed user without isAdmin property");
+  console.assert(
+    user.isAdmin !== undefined,
+    "createToken passed user without isAdmin property"
+  );
 
   let payload = {
     username: user.username,
     isAdmin: user.isAdmin || false,
   };
 
-  return jwt.sign(payload, SECRET_KEY);
+  // Adding a time expiration to jwt
+  const options = {
+    expiresIn: "1h",
+  };
+
+  return jwt.sign(payload, SECRET_KEY, options);
 }
 
 module.exports = { createToken };

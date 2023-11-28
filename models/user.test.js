@@ -67,7 +67,7 @@ describe("register - USER", function () {
   test("works", async function () {
     let user = await User.register({
       ...newUser,
-      password: "password",
+      password: "Password1",
     });
     expect(user).toEqual(newUser);
     const found = await db.query("SELECT * FROM users WHERE username = 'new'");
@@ -79,7 +79,7 @@ describe("register - USER", function () {
   test("works: adds admin", async function () {
     let user = await User.register({
       ...newUser,
-      password: "password",
+      password: "Password1",
       isAdmin: true,
     });
     expect(user).toEqual({ ...newUser, isAdmin: true });
@@ -232,7 +232,7 @@ describe("remove - USER", function () {
 
 /************************************** applyToJob */
 
-describe("applyToJob", function () {
+describe("applyToJob - USER", function () {
   test("works", async function () {
     await User.applyToJob("u1", testJobsIds[1]);
 
@@ -262,6 +262,31 @@ describe("applyToJob", function () {
       fail();
     } catch (err) {
       expect(err instanceof NotFoundError).toBeTruthy();
+    }
+  });
+});
+
+/************************************** updatePassword */
+
+describe("updatePassword - USER", function () {
+  test("works", async function () {
+    const res = await User.updatePassword("u1", "randomPass1");
+    expect(res).toEqual({ username: "u1" });
+  });
+
+  test("not found if user does not exist", async function () {
+    try {
+      const res = await User.updatePassword("nope", "randomPass");
+    } catch (err) {
+      expect(err instanceof NotFoundError).toBeTruthy();
+    }
+  });
+
+  test("bad request error if password doesn't pass validation", async function () {
+    try {
+      const res = await User.updatePassword("u1", "2Short");
+    } catch (err) {
+      expect(err instanceof BadRequestError).toBeTruthy();
     }
   });
 });

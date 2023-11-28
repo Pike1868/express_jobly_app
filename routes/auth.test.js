@@ -24,7 +24,7 @@ describe("POST /auth/token", function () {
         .post("/auth/token")
         .send({
           username: "u1",
-          password: "password1",
+          password: "Password1",
         });
     expect(resp.body).toEqual({
       "token": expect.any(String),
@@ -36,7 +36,7 @@ describe("POST /auth/token", function () {
         .post("/auth/token")
         .send({
           username: "no-such-user",
-          password: "password1",
+          password: "Password1",
         });
     expect(resp.statusCode).toEqual(401);
   });
@@ -65,7 +65,7 @@ describe("POST /auth/token", function () {
         .post("/auth/token")
         .send({
           username: 42,
-          password: "above-is-a-number",
+          password: "Above-is-a-number42",
         });
     expect(resp.statusCode).toEqual(400);
   });
@@ -81,7 +81,7 @@ describe("POST /auth/register", function () {
           username: "new",
           firstName: "first",
           lastName: "last",
-          password: "password",
+          password: "Password1",
           email: "new@email.com",
         });
     expect(resp.statusCode).toEqual(201);
